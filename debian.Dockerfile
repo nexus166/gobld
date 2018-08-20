@@ -9,10 +9,14 @@ RUN	export DEBIAN_FRONTEND=noninteractive; \
 		binutils build-essential ca-certificates wget; \
 	rm -rf /var/lib/apt/lists/*
 
-ENV	GOPATH="/opt/go"
+ENV     GOPATH="/opt/go"
 
-ARG	GO_VERSION=1.10.4
-ENV	GOROOT_BOOTSTRAP="/usr/local/go${GO_VERSION}"
+ARG     GO_VERSION=1.12.6
+
+ARG     GO_BOOTSTRAP_VERSION
+
+ENV     GO_BOOTSTRAP_VERSION=${GO_BOOTSTRAP_VERSION:-${GO_VERSION}}
+ENV     GOROOT_BOOTSTRAP="/usr/local/go${GO_BOOTSTRAP_VERSION}"
 
 RUN	case "$(dpkg --print-architecture)" in \
 			arm*) GO_DL_ARCH='armv6l';; \
@@ -23,7 +27,7 @@ RUN	case "$(dpkg --print-architecture)" in \
 			*) echo >&2 "error: unsupported architecture"; exit 1 ;; \
 		esac; \
 	mkdir -p "${GOROOT_BOOTSTRAP}"; \
-	wget -qO- "https://dl.google.com/go/go${GO_VERSION}.$(uname -s | tr '[[:upper:]]' '[[:lower:]]')-${GO_DL_ARCH}.tar.gz" | tar fzx - -C "${GOROOT_BOOTSTRAP}" --strip-components=1; \
+	wget -qO- "https://dl.google.com/go/go${GO_BOOTSTRAP_VERSION}.$(uname -s | tr '[[:upper:]]' '[[:lower:]]')-${GO_DL_ARCH}.tar.gz" | tar fzx - -C "${GOROOT_BOOTSTRAP}" --strip-components=1; \
 	export PATH="${GOPATH}/bin:${GOROOT_BOOTSTRAP}/bin:${PATH}"; \
 	${GOROOT_BOOTSTRAP}/bin/go version; \
 	export \
@@ -36,7 +40,7 @@ RUN	case "$(dpkg --print-architecture)" in \
 	wget -qO- "https://dl.google.com/go/go${GO_VERSION}.src.tar.gz" | tar zxf - -C /usr/local; \
 	cd /usr/local/go/src; \
 	./make.bash; \
-	rm -rf "${GOROOT_BOOTSTRAP}" /usr/local/go/pkg/bootstrap /usr/local/go/pkg/obj /usr/local/go/doc /usr/local/go/test
+	rm -rf ~/.cache "${GOROOT_BOOTSTRAP}" /usr/local/go/pkg/bootstrap /usr/local/go/pkg/obj /usr/local/go/doc /usr/local/go/test
 
 
 FROM	debian:buster-slim
