@@ -20,6 +20,7 @@ for _go_version in ${_TARGET_GO_VERSIONS}; do
 		CONTAINER_TAG="${TARGET_OS_BASE}-${_target_tag}_go${_go_version}${TAG_CGO}";
 		sed "s|_BASE_TAG_|$BASE_CONTAINER_TAG|g;s|_TAG_|$_target_tag|g" "${_HOME}/${TARGET_OS_BASE}.Dockerfile" | \
 			docker build \
+				--rm \
 				--no-cache \
 				--tag "${CONTAINER}:${CONTAINER_TAG}" \
 				-;

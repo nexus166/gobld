@@ -4,11 +4,6 @@ FROM	ubuntu:_TAG_
 
 SHELL	["/bin/bash", "-xeuo", "pipefail", "-c"]
 
-ENV	GOPATH="/opt/go"
-ENV	GOROOT="/usr/local/go"
-
-COPY	--from=0 "${GOROOT}" "${GOROOT}"
-
 RUN	export DEBIAN_FRONTEND=noninteractive; \
 	apt-get update; \
 	apt-get dist-upgrade -y; \
@@ -16,6 +11,9 @@ RUN	export DEBIAN_FRONTEND=noninteractive; \
 		binutils ca-certificates git; \
 	rm -rf ~/.cache /var/lib/apt/lists/*
 
-ENV	PATH="${GOROOT}/bin:${GOPATH}/bin:${PATH}"
+ENV     GOPATH="/opt/go" GOROOT="/usr/local/go"
+ENV     PATH="${GOROOT}/bin:${GOPATH}/bin:${PATH}"
+
+COPY    --from=0 "${GOROOT}" "${GOROOT}"
 
 RUN	go env && env | grep GO && go version
