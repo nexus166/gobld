@@ -7,7 +7,7 @@ echo "$CONTAINER"
 _HOME="$(git rev-parse --show-toplevel)"
 
 TARGET_OS_BASE="${1:-alpine}"
-TARGET_TAGS=${2:-"3.8 3.9"}
+TARGET_TAGS=${2:-"3.10"}
 LATEST_TAG="$(echo ${TARGET_TAGS} | tr ' ' '\n' | tail -1)"
 
 _TARGET_GO_VERSIONS=${TARGET_GO_VERSIONS:-$(< $_HOME/ver/TARGET_VERSIONS)}

@@ -1,5 +1,4 @@
-FROM	_ORIG_CONTAINER_:_TAG_
-
+FROM	nexus166/gcc:ext
 SHELL	["/bin/bash", "-evxo", "pipefail", "-c"]
 
 ARG	CGO_ENABLED=0
@@ -9,16 +8,17 @@ RUN     export DEBIAN_FRONTEND=noninteractive; \
         apt-get update; \
         apt-get dist-upgrade -y; \
         apt-get install -y --no-install-recommends \
-                binutils build-essential ca-certificates wget; \
-	[[ "${CGO_ENABLED}" -eq 1 ]] && apt-get install -y --no-install-recommends gccgo; \
+                binutils ca-certificates wget; \
+	apt-get clean; \
+	apt-get autoclean; \
         rm -rf /var/lib/apt/lists/*
 
 ENV	GOPATH="/opt/go"
 
-ARG	GO_LDFLAGS="-s -w"
-ENV	GO_LDFLAGS="${GO_LDFLAGS}"
+ENV	GO_LDFLAGS="-s -w" \
+	CGO_CFLAGS="-O3 -fomit-frame-pointer -pipe"
 
-ARG	GO_VERSION=1.12.6
+ARG	GO_VERSION=1.13.1
 
 ARG	GO_BOOTSTRAP_VERSION
 
@@ -51,7 +51,7 @@ RUN	case "$(dpkg --print-architecture)" in \
 	./make.bash; \
 	rm -rf ~/.cache "${GOROOT_BOOTSTRAP}" /usr/local/go/pkg/bootstrap /usr/local/go/pkg/obj /usr/local/go/doc /usr/local/go/test
 
-FROM	_ORIG_CONTAINER_:_TAG_
+FROM	debian:buster-slim
 
 COPY	--from=0	/usr/local/go	/usr/local/go
 
@@ -59,24 +59,12 @@ SHELL	["/bin/bash", "-euvxo", "pipefail", "-c"]
 
 ENV	GOROOT="/usr/local/go"
 ENV	GOPATH="/opt/go"
-
+ENV	GOPROXY="direct"
 ENV	PATH="${GOROOT}/bin:${GOPATH}/bin:/usr/local/go/bin:${PATH}"
 
 WORKDIR	"${GOPATH}"
 
-ENV	GO_LDFLAGS="-s -w"
+ENV	GO_LDFLAGS="-s -w" \
+	CGO_CFLAGS="-O3 -fomit-frame-pointer -pipe"
 
 RUN	go env && env | grep GO && go version
-
-ONBUILD	SHELL		["/bin/bash", "-euvxo", "pipefail", "-c"]
-
-ONBUILD ENV             GOROOT="/usr/local/go"
-ONBUILD	ENV		GOPATH="/opt/go"
-
-ONBUILD	ENV		PATH="${GOROOT}/bin:${GOPATH}/bin:/usr/local/go/bin:${PATH}"
-
-ONBUILD WORKDIR         "${GOPATH}"
-
-ONBUILD	ENV		GO_LDFLAGS="-s -w"
-
-ONBUILD	RUN		go env && env | grep GO && go version
