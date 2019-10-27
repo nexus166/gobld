@@ -1,4 +1,4 @@
-FROM	nexus166/gcc:ext
+FROM	debian:buster-slim
 SHELL	["/bin/bash", "-evxo", "pipefail", "-c"]
 
 ARG	CGO_ENABLED=0
@@ -8,7 +8,7 @@ RUN     export DEBIAN_FRONTEND=noninteractive; \
         apt-get update; \
         apt-get dist-upgrade -y; \
         apt-get install -y --no-install-recommends \
-                binutils ca-certificates wget; \
+                binutils ca-certificates gcc make wget; \
 	apt-get clean; \
 	apt-get autoclean; \
         rm -rf /var/lib/apt/lists/*
@@ -18,19 +18,21 @@ ENV	GOPATH="/opt/go"
 ENV	GO_LDFLAGS="-s -w" \
 	CGO_CFLAGS="-O3 -fomit-frame-pointer -pipe"
 
-ARG	GO_VERSION=1.13.1
+ARG	GO_VERSION=1.13.3
 
 ARG	GO_BOOTSTRAP_VERSION
 
 ENV	GO_BOOTSTRAP_VERSION=${GO_BOOTSTRAP_VERSION:-${GO_VERSION}}
 ENV	GOROOT_BOOTSTRAP="/usr/local/go${GO_BOOTSTRAP_VERSION}"
 
-RUN	case "$(dpkg --print-architecture)" in \
-			arm*) GO_DL_ARCH='armv6l';; \
-			aarch64) GO_DL_ARCH='arm64';; \
+RUN	a="$(dpkg --print-architecture)"; \
+	case "$a" in \
+			arm64|aarch64) GO_DL_ARCH='arm64';; \
+			armv*|armhf) GO_DL_ARCH='armv6l';; \
 			s390x) GO_DL_ARCH='s390x';; \
 			amd64) GO_DL_ARCH='amd64';; \
 			i386) GO_DL_ARCH='386';; \
+			ppc64*) GO_DL_ARCH='ppc64le';; \
 			*) echo >&2 "error: unsupported architecture"; exit 1 ;; \
 		esac; \
 	mkdir -vp "${GOROOT_BOOTSTRAP}"; \
