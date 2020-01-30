@@ -9,6 +9,7 @@ RUN     export DEBIAN_FRONTEND=noninteractive; \
         apt-get dist-upgrade -y; \
         apt-get install -y --no-install-recommends \
                 binutils ca-certificates gcc make wget; \
+	[[ "$CGO_ENABLED" == 1 ]] && apt-get install -y --no-install-recommends build-essential gccgo; \
 	apt-get clean; \
 	apt-get autoclean; \
         rm -rf /var/lib/apt/lists/*
