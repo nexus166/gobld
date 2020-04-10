@@ -13,7 +13,8 @@ TAG_CGO="$([[ ${CGO_ENABLED} -eq 1 ]] && printf '%s' '-cgo' || true)"
 for _go_version in ${_TARGET_GO_VERSIONS}; do
 	BASE_CONTAINER_TAG="base_go${_go_version}${TAG_CGO}";
 	cat "${_HOME}/base.Dockerfile" | \
-		docker build \
+		docker buildx build \
+			--platform linux/amd64,linux/arm64,linux/386 \
 			--build-arg CGO_ENABLED="${CGO_ENABLED:-0}" \
 			--build-arg GO_VERSION="${_go_version}" \
 			--build-arg GO_BOOTSTRAP_VERSION="${GO_BOOTSTRAP_VERSION:-${_LATEST_GO}}" \
