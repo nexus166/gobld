@@ -1,4 +1,5 @@
-FROM    _ORIG_CONTAINER_:_TAG_
+ARG	FROM="debian:bullseye-slim"
+FROM    ${FROM}
 
 SHELL   ["/bin/bash", "-evxo", "pipefail", "-c"]
 
@@ -18,7 +19,7 @@ ENV     GOPATH="/opt/go"
 ARG     GO_LDFLAGS="-s -w"
 ENV     GO_LDFLAGS="${GO_LDFLAGS}"
 
-ARG     GO_VERSION=1.14.2
+ARG     GO_VERSION=1.15.6
 
 ARG     GO_BOOTSTRAP_VERSION
 
@@ -35,7 +36,7 @@ RUN     case "$(dpkg --print-architecture)" in \
                         *) echo >&2 "error: unsupported architecture"; exit 1 ;; \
                 esac; \
         mkdir -vp "${GOROOT_BOOTSTRAP}"; \
-        wget -qO- "https://dl.google.com/go/go${GO_BOOTSTRAP_VERSION}.$(uname -s | tr '[[:upper:]]' '[[:lower:]]')-${GO_DL_ARCH}.tar.gz" | tar fzx - -C "${GOROOT_BOOTSTRAP}" --strip-components=1; \
+        wget -qO- "https://dl.google.com/go/go${GO_BOOTSTRAP_VERSION}.$(uname -s | tr '[[:upper:]]' '[[:lower:]]')-${GO_DL_ARCH}.tar.gz" | tar zxf - -C "${GOROOT_BOOTSTRAP}" --strip-components=1; \
         export \
                 PATH="${GOPATH}/bin:${GOROOT_BOOTSTRAP}/bin:${PATH}" \
                 GOROOT="${GOROOT_BOOTSTRAP}"; \
@@ -52,7 +53,7 @@ RUN     case "$(dpkg --print-architecture)" in \
         ./make.bash; \
         rm -rf ~/.cache "${GOROOT_BOOTSTRAP}" /usr/local/go/pkg/bootstrap /usr/local/go/pkg/obj /usr/local/go/doc /usr/local/go/test
 
-FROM    _ORIG_CONTAINER_:_TAG_
+FROM    ${FROM}
 
 COPY    --from=0        /usr/local/go   /usr/local/go
 

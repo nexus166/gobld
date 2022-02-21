@@ -1,7 +1,8 @@
-FROM	nexus166/gobld:_BASE_TAG_
+ARG	GOBLD_TAG=base
+ARG	OS_TAG=edge
 
-FROM	alpine:_TAG_
-
+FROM	nexus166/gobld:${GOBLD_TAG}
+FROM	alpine:${OS_TAG}
 SHELL	["/bin/ash", "-xeuo", "pipefail", "-c"]
 
 RUN	apk update; \

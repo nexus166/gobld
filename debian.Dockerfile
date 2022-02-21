@@ -1,7 +1,8 @@
-FROM	nexus166/gobld:_BASE_TAG_
+ARG	GOBLD_TAG=base
+ARG	OS_TAG=bullseye
 
-FROM	debian:_TAG_
-
+FROM	nexus166/gobld:${GOBLD_TAG}
+FROM	debian:${OS_TAG}-slim
 SHELL	["/bin/bash", "-xeuo", "pipefail", "-c"]
 
 RUN	export DEBIAN_FRONTEND=noninteractive; \
